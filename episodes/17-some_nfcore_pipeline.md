@@ -6,13 +6,13 @@ exercises: 40
 
 ::::::::::::::::::::::::::::::::::::::: objectives
 
-- 
+- Objectives here
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
 
 :::::::::::::::::::::::::::::::::::::::: questions
 
-- 
+- Question here
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -374,158 +374,6 @@ $ nextflow run main.nf --outdir results --profile demo
 In this step you have learned:
 
 - How to add inputs to modules and assign their outputs to variables in the workflow section of the workflow script.
-
-## Mixing module versions
-
-Next we will use the `mix` operator to combine the `versions` output of each of the four modules we've added to the pipeline with the empty `ch_versions` channel, so the versions can be passed to the softwareVersionsToYAML module. The output of this module will be saved as ch_collated_versions and passed to MultiQC in a later step.
-
-**Note:** The `versions` output of the four module must be combined with the `first` operator, because we only need one instance of each version.
-
-```groovy 
-//genomeassembler-4.nf
-
-[..truncated..] 
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    RUN MAIN WORKFLOW
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-workflow GENOMEASSEMBLER {
-
-    take:
-    ch_samplesheet // channel: samplesheet read in from --input
-    multiqc_config
-    multiqc_logo
-    outdir
-
-    main:
-
-    def ch_versions = channel.empty()
-    def ch_multiqc_files = channel.empty()
-
-    //
-    // MODULE: seqtk trim
-    //
-    SEQTK_TRIM(ch_samplesheet)
-    ch_trimmed_reads = SEQTK_TRIM.out.reads
-    seqtk_versions =
-    ch_versions = ch_versions.mix()
-
-    //
-    // MODULE: shovill
-    //
-    SHOVILL(ch_trimmed_reads)
-    ch_assemblies = SHOVILL.out.contigs
-    shovill_versions =
-    ch_versions = ch_versions.mix()
-
-    //
-    // MODULE: fastqc
-    //
-    FASTQC(ch_samplesheet)
-    ch_read_qc = FASTQC.out.zip.collect()
-    fastqc_versions =
-    ch_versions = ch_versions.mix()
-
-    //
-    // MODULE: quast
-    //
-    QUAST(ch_assemblies)
-    ch_assembly_qc = QUAST.out.tsv.collect()
-    quast_versions =
-    ch_versions = ch_versions.mix()
-
-[..truncated..] 
-
-}
-```
-
-:::::::::::::::::::::::::::::::::::::::  challenge
-
-## Add module inputs and assign module outputs
-
-Modify `genomeassembler-4.nf` and use the `mix` operator to combine the `versions` output of each module to the `ch_versions` channel.
-
-**Remember:** The `versions` output of each module must be combined with the `first` operator, because we only need one instance of each version.
-
-:::::::::::::::  solution
-
-## Solution
-
-```groovy 
-[..truncated..] 
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    RUN MAIN WORKFLOW
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-workflow GENOMEASSEMBLER {
-
-    take:
-    ch_samplesheet // channel: samplesheet read in from --input
-    multiqc_config
-    multiqc_logo
-    outdir
-
-    main:
-
-    def ch_versions = channel.empty()
-    def ch_multiqc_files = channel.empty()
-
-    //
-    // MODULE: seqtk trim
-    //
-    SEQTK_TRIM(ch_samplesheet)
-    ch_trimmed_reads = SEQTK_TRIM.out.reads
-    ch_versions = ch_versions.mix(SEQTK_TRIM.out.versions.first())
-
-    //
-    // MODULE: shovill
-    //
-    SHOVILL(ch_trimmed_reads)
-    ch_assemblies = SHOVILL.out.contigs
-    ch_versions = ch_versions.mix(SHOVILL.out.versions.first())
-
-    //
-    // MODULE: fastqc
-    //
-    FASTQC(ch_samplesheet)
-    ch_read_qc = FASTQC.out.zip.collect()
-    ch_versions = ch_versions.mix(FASTQC.out.versions.first())
-
-    //
-    // MODULE: quast
-    //
-    QUAST(ch_assemblies)
-    ch_assembly_qc = QUAST.out.tsv.collect()
-    ch_versions = ch_versions.mix(QUAST.out.versions.first())
-
-[..truncated..] 
-
-}
-```
-
-:::::::::::::::::::::::::
-
-::::::::::::::::::::::::::::::::::::::::::::::::::
-
-
-Copy the modified `genomeassembler-4.nf` script to the `workflows/` directory, renaming it to `genomeassembler.nf`, and run it by using the following command:
-
-```bash
-$ cp bin/genomeassembler-4.nf workflows/genomeassembler.nf
-$ nextflow run main.nf --outdir results --profile demo
-```
-
-### Recap
-
-In this step you have learned:
-
-- How to
 
 ## Mixing module versions
 
