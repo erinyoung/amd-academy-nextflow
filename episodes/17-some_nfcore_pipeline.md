@@ -1,7 +1,7 @@
 ---
-title: Simple genome assembly pipeline
-teaching: 20
-exercises: 40
+title: nf-core modules
+teaching: 15
+exercises: 30
 ---
 
 ::::::::::::::::::::::::::::::::::::::: objectives
@@ -17,6 +17,7 @@ exercises: 40
 - Add a module to a custom nf-core pipeline.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
+
 
 We're now set to develop a multi-step genome assembly pipeline using nf-core. This is the same pipeline we made in Episode 11. As a reminder, in this pipeline we'll undertake the following steps to assemble bacterial whole genome sequence data:
 
@@ -516,9 +517,8 @@ $ cp bin/genomeassembler-5.nf workflows/genomeassembler.nf
 $ nextflow run main.nf --outdir results --profile demo
 ```
 
-
-::::::::::::::::::::::::::::::::::::::::::::::::::
-
 :::::::::::::::::::::::::::::::::::::::: keypoints
-
+- An nf-core module is a Nextflow  "wrapper" around a command-line tool or script, which is a used as a process in an nf-core workflow.
+- Modules can be installed using `nf-core modules install`
+- Modules can be added to your custom pipeline by adding an `include` statement and the module process to the pipeline's workflow script.
 ::::::::::::::::::::::::::::::::::::::::::::::::::
