@@ -6,16 +6,17 @@ exercises: 40
 
 ::::::::::::::::::::::::::::::::::::::: objectives
 
-- Objectives here
+- What are nf-core modules?
+- How do I add a module to an nf-core pipeline?
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
 
 :::::::::::::::::::::::::::::::::::::::: questions
 
-- Question here
+- Explain the purpose and contents of nf-core modules.
+- Add a module to a custom nf-core pipeline.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
-
 
 We're now set to develop a multi-step genome assembly pipeline using nf-core. This is the same pipeline we made in Episode 11. As a reminder, in this pipeline we'll undertake the following steps to assemble bacterial whole genome sequence data:
 
@@ -380,7 +381,7 @@ In this step you have learned:
 Next we will use the `mix` operator to combine the `ch_read_qc` and `ch_assembly_qc` channels with the prexisting, empty `ch_multiqc_files` channel, so the results of FastQC and QUAST can be passed to the MultiQC module.
 
 ```groovy 
-//genomeassembler-5.nf
+//genomeassembler-4.nf
 
 [..truncated..] 
 
@@ -408,16 +409,12 @@ workflow GENOMEASSEMBLER {
     //
     SEQTK_TRIM(ch_samplesheet)
     ch_trimmed_reads = SEQTK_TRIM.out.reads
-    seqtk_versions = SEQTK_TRIM.out.versions.first()
-    ch_versions = ch_versions.mix(seqtk_versions)
 
     //
     // MODULE: shovill
     //
     SHOVILL(ch_trimmed_reads)
     ch_assemblies = SHOVILL.out.contigs
-    shovill_versions = SHOVILL.out.versions.first()
-    ch_versions = ch_versions.mix(shovill_versions)
 
     //
     // MODULE: fastqc
@@ -425,7 +422,6 @@ workflow GENOMEASSEMBLER {
     FASTQC(ch_samplesheet)
     ch_read_qc = FASTQC.out.zip.collect()
     fastqc_versions = FASTQC.out.versions.first()
-    ch_versions = ch_versions.mix(fastqc_versions)
     ch_multiqc_files = ch_multiqc_files.mix()
 
     //
@@ -434,7 +430,6 @@ workflow GENOMEASSEMBLER {
     QUAST(ch_assemblies)
     ch_assembly_qc = QUAST.out.tsv.collect()
     quast_versions = QUAST.out.versions.first()
-    ch_versions = ch_versions.mix(quast_versions)
     ch_multiqc_files = ch_multiqc_files.mix()
 
 [..truncated..] 
@@ -479,7 +474,6 @@ workflow GENOMEASSEMBLER {
     //
     SEQTK_TRIM(ch_samplesheet)
     ch_trimmed_reads = SEQTK_TRIM.out.reads
-    seqtk_versions = SEQTK_TRIM.out.versions.first()
     ch_versions = ch_versions.mix(seqtk_versions)
 
     //
@@ -487,7 +481,6 @@ workflow GENOMEASSEMBLER {
     //
     SHOVILL(ch_trimmed_reads)
     ch_assemblies = SHOVILL.out.contigs
-    shovill_versions = SHOVILL.out.versions.first()
     ch_versions = ch_versions.mix(shovill_versions)
 
     //
@@ -495,8 +488,6 @@ workflow GENOMEASSEMBLER {
     //
     FASTQC(ch_samplesheet)
     ch_read_qc = FASTQC.out.zip.collect()
-    fastqc_versions = FASTQC.out.versions.first()
-    ch_versions = ch_versions.mix(fastqc_versions)
     ch_multiqc_files = ch_multiqc_files.mix(ch_read_qc)
 
     //
