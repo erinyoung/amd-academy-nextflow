@@ -57,6 +57,17 @@ $ zgrep -c '^>' data/yeast/transcriptome/Saccharomyces_cerevisiae.R64-1-1.cdna.a
 6612
 ```
 
+:::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+::::::::::::::::::::::::::::::::::::: instructor
+
+Create a nextflow script called to `process.nf` for the following examples.
+Explain that as you will be setting up channels, processes, and workflow blocks.
+
+:::::::::::::::::::::::::::::::::::::::::::::::::
 
 Now we will show how to convert this into a simple Nextflow process.
 
@@ -87,9 +98,6 @@ To add the process to a workflow add a `workflow` block, and call the process li
 
 
 ```groovy
-//process_01.nf
-
-
 process NUMSEQ {
   script:
   "zgrep -c '^>' ${projectDir}/data/yeast/transcriptome/Saccharomyces_cerevisiae.R64-1-1.cdna.all.fa.gz"
@@ -104,16 +112,21 @@ workflow {
 We can now run the process:
 
 ```bash
-$ nextflow run process_01.nf -process.debug
+$ nextflow run process.nf -process.debug
 ```
  **Note** We need to add the Nextflow run option `-process.debug` to print the output to the terminal.
 
 ```output
-N E X T F L O W  ~  version 21.10.6
-Launching `process_01.nf` [modest_pike] - revision: 3eaa812b17
+
+ N E X T F L O W   ~  version 26.04.4
+
+Launching `process.nf` [goofy_shockley] revision: 0398eaa799
+
 executor >  local (1)
-[cd/eab1fd] process > NUMSEQ [100%] 1 of 1 ✔
+[6e/1de921] process > NUMSEQ [100%] 1 of 1 ✔
 6612
+
+
 ```
 
 
@@ -130,8 +143,6 @@ zgrep -v '^>' ${projectDir}/data/yeast/transcriptome/Saccharomyces_cerevisiae.R6
 
 ## Solution
 ```groovy
-
-
 process COUNT_BASES {
    
 script:
@@ -152,11 +163,16 @@ $ nextflow run simple_process.nf -process.debug
 ```
 
 ```output
-N E X T F L O W  ~  version 21.04.0
-Launching `simple_process.nf`` [prickly_gilbert] - revision: 471a79c65c
+
+ N E X T F L O W   ~  version 26.04.4
+
+Launching `simple_process.nf` [extravagant_stone] revision: 32d6563a6f
+
 executor >  local (1)
-[56/5e6001] process > COUNT_BASES [100%] 1 of 1 ✔
+[7b/656df5] process > COUNT_BASES [100%] 1 of 1 ✔
 8772368
+
+
 ```
 
 :::::::::::::::::::::::::
@@ -203,8 +219,6 @@ A process contains only one `script` block, and it must be the last statement wh
 The `script` block can be a simple one line string in quotes e.g.
 
 ```groovy
-
-
 process NUMSEQ {
     script:
     "zgrep -c '^>' ${projectDir}/data/yeast/transcriptome/Saccharomyces_cerevisiae.R64-1-1.cdna.all.fa.gz"
@@ -217,12 +231,9 @@ workflow {
 
 Or, for commands that span multiple lines you can encase the command in  triple quotes `"""`.
 
-For example:
+For an example in process_multi_line.nf:
 
 ```groovy
-//process_multi_line.nf
-
-
 process NUMSEQ_CHR {
     script:
     """
@@ -241,27 +252,29 @@ $ nextflow run process_multi_line.nf -process.debug
 ```
 
 ```output
-N E X T F L O W  ~  version 21.10.6
-Launching `process_multi_line.nf` [focused_jang] - revision: e32caf0dcb
+
+ N E X T F L O W   ~  version 26.04.4
+
+Launching `process_multi_line.nf` [lethal_ekeblad] revision: a618bad4fd
+
 executor >  local (1)
-[90/6e38f4] process > NUMSEQ_CHR [100%] 1 of 1 ✔
+[a9/931152] process > NUMSEQ_CHR [100%] 1 of 1 ✔
 118
+
+
 ```
 
 ::::::::::::::::::::::::::::::::::::: instructor
 
-The following section on python  is meant to be run by the instructor not the learners. 
+The following section on python is meant to be run by the instructor not the learners. 
 It is meant to be a demonstration of the different ways to run a process.
 This can be skipped for time.
 
 :::::::::::::::::::::::::::::::::::::::::::::::::
 
-By default the process command is interpreted as a **Bash** script. However, any other scripting language can be used just simply starting the script with the corresponding [Shebang](https://en.wikipedia.org/wiki/Shebang_(Unix)) declaration. For example:
+By default the process command is interpreted as a **Bash** script. However, any other scripting language can be used just simply starting the script with the corresponding [Shebang](https://en.wikipedia.org/wiki/Shebang_(Unix)) declaration. For example in a file named process_python.nf:
 
 ```groovy
-//process_python.nf
-
-
 process PROCESS_READS {
   script:
   """
@@ -294,14 +307,17 @@ $ nextflow run process_python.nf -process.debug
 ```
 
 ```output
- N E X T F L O W   ~  version 24.04.4
 
-Launching `process_python.nf` [mad_montalcini] DSL2 - revision: ee25d49465
+ N E X T F L O W   ~  version 26.04.4
+
+Launching `process_python.nf` [focused_mayer] revision: 265e013d19
 
 executor >  local (1)
-[b4/a100c3] PROCESS_READS [100%] 1 of 1 ✔
+[a1/397f9d] process > PROCESS_READS [100%] 1 of 1 ✔
 reads 14677
 bases 1482377
+
+
 ```
 
 This allows the use of a different programming languages which may better fit a particular job. However, for large chunks of code it is suggested to save them into separate files and invoke them from the process script.
@@ -310,12 +326,6 @@ This allows the use of a different programming languages which may better fit a 
 
 Scripts such as the one in the example below, `process_reads.py`, can be stored in a `bin` folder at the same directory level as the Nextflow workflow script that invokes them, and given execute permission. Nextflow will automatically add this folder to the `PATH` environment variable. To invoke the script in a Nextflow process, simply use its filename on its own rather than invoking the interpreter e.g. `process_reads.py` instead of `python process_reads.py`.
 **Note** The script `process_reads.py` must be executable to run.
-
-```bash
-mkdir bin
-mv process_reads.py bin
-chmod 755 bin/process_reads.py
-```
 
 ```python
 #!/usr/bin/env python
@@ -338,10 +348,17 @@ print("reads", reads)
 print("bases", bases)
 ```
 
+Once the python script has been created, best practice is to move it to the bin directory. More information about bin can be found [here](https://docs.seqera.io/nextflow/sharing#the-bin-directory).
+
+```bash
+mkdir bin
+mv process_reads.py bin
+chmod 755 bin/process_reads.py
+```
+
+In a nextflow script named process_python_script.nf:
+
 ```groovy
-//process_python_script.nf
-
-
 process PROCESS_READS {
 
   script:
@@ -356,23 +373,28 @@ workflow {
 ```
 
 ```bash
-nextflow run process_python_script.nf -process.debug
+$ nextflow run process_python_script.nf -process.debug
 ```
 
 ```output
-N E X T F L O W  ~  version 23.10.1
-Launching `pr.nf` [kickass_legentil] DSL2 - revision: 3b9eee1d47
+
+ N E X T F L O W   ~  version 26.04.4
+
+Launching `process_python_script.nf` [special_elion] revision: e4cb2dd30e
+
 executor >  local (1)
-[88/759311] process > PROCESS_READS [100%] 1 of 1 ✔
+[d7/1d1fdd] process > PROCESS_READS [100%] 1 of 1 ✔
 reads 14677
 bases 1482377
+
+
 ```
 
 :::::::::::::::::::::::::::::::::::::::::  callout
 
 ## Associated scripts
 
-Scripts such as the one in the example above, `process_reads.py`, can be stored in a `bin` folder at the same directory level as the Nextflow workflow script that invokes them, and given execute permission. Nextflow will automatically add this folder to the `PATH` environment variable. To invoke the script in a Nextflow process, simply use its filename on its own rather than invoking the interpreter e.g. `process_reads.py` instead of `python process_reads.py`.
+Scripts such as the one in the example above, `process_reads.py`, can be stored in a `bin` folder at the same directory level as the Nextflow workflow script that invokes them, and given execute permission. Nextflow will automatically add this folder to the `PATH` environment variable. To invoke the script in a Nextflow process, simply use its filename on its own rather than invoking the interpreter e.g. `process_reads.py` instead of `python process_reads.py`. More information about bin can be found [here](https://docs.seqera.io/nextflow/sharing#the-bin-directory).
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -394,11 +416,10 @@ In the example below the variable `chr` is set to the value A at the top of the 
 The variable is referenced using the `$chr` syntax within the multi-line string statement in the `script` block.
 A Nextflow variable can be used multiple times in the script block.
 
+In a workflow script named process_script.nf:
+
 ```groovy
-//process_script.nf
-
-
-chr = "A"
+def chr = "A"
 
 process CHR_COUNT {
 
@@ -412,6 +433,24 @@ process CHR_COUNT {
 workflow {
   CHR_COUNT()
 }
+```
+
+```bash
+$ nextflow run process_script.nf -process.debug
+```
+
+```output
+
+ N E X T F L O W   ~  version 26.04.4
+
+Launching `process_python_script.nf` [special_elion] revision: e4cb2dd30e
+
+executor >  local (1)
+[d7/1d1fdd] process > PROCESS_READS [100%] 1 of 1 ✔
+reads 14677
+bases 1482377
+
+
 ```
 
 In most cases we do not want to hard code parameter values. We saw in the parameter episode the use of a special Nextflow variable `params` that can be used to assign values from the command line. You would do this by adding a key name to the params variable and specifying a value, like `params.keyname = value`
