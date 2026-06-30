@@ -1,7 +1,4 @@
-//process_script.nf
-
-
-chr = "A"
+def chr = "A"
 
 process CHR_COUNT {
 
