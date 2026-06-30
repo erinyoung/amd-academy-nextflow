@@ -231,8 +231,6 @@ Connect the output of the process `FASTQC` to `PARSEZIP` in the Nextflow script 
 **Note:** You will need to pass the `read_pairs_ch` as an argument to FASTQC and you will need to use the `collect` operator to gather the items in the FASTQC channel output to a single List item.
 
 ```groovy 
-//workflow_exercise.nf
-
 params.reads = 'data/yeast/reads/*_{1,2}.fq.gz'
 
 process FASTQC {
