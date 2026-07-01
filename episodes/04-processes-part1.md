@@ -57,18 +57,6 @@ $ zgrep -c '^>' data/yeast/transcriptome/Saccharomyces_cerevisiae.R64-1-1.cdna.a
 6612
 ```
 
-:::::::::::::::::::::::::
-
-::::::::::::::::::::::::::::::::::::::::::::::::::
-
-
-::::::::::::::::::::::::::::::::::::: instructor
-
-Explain that this lesson will be creating multiple nextflow scripts and that
-if any students get lost, an example copy can be found in episodes/files/scripts/process.
-
-:::::::::::::::::::::::::::::::::::::::::::::::::
-
 Now we will show how to convert this into a simple Nextflow process.
 
 ## Process definition
