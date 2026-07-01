@@ -64,7 +64,7 @@ $ multiqc .
 To start move the episode's nextflow scripts in the `scripts/genomeassembly_pipeline` folder to your home directory.
 
 ```bash
-$ cp scripts/genomeassembly_pipeline/* .
+$ cp episodes/files/scripts/genomeassembly_pipeline/* .
 ```
 
 This folder contains files we will be modifying in this episode.
@@ -82,15 +82,24 @@ The script `script1.nf` defines the pipeline input parameters.
 
 params.reads = "data/bacteria/reads/*_R{1,2}.fastq.gz"
 
-
-println "reads: $params.reads"
-
+workflow {
+  println "reads: $params.reads"
+}
 ```
 
 Run it by using the following command:
 
 ```bash
 $ nextflow run script1.nf
+```
+
+```output
+
+ N E X T F L O W   ~  version 26.04.4
+
+Launching `script1.nf` [serene_lamport] revision: 706a4fc6f8
+
+reads: data/bacteria/reads/*_R{1,2}.fq.gz
 ```
 
 We can specify a different input parameter using the `--<params>` option, for example :
@@ -100,6 +109,11 @@ $ nextflow run script1.nf --reads "data/bacteria/reads/sample*_{1,2}.fastq.gz"
 ```
 
 ```output 
+
+ N E X T F L O W   ~  version 26.04.4
+
+Launching `script1.nf` [romantic_marconi] revision: 706a4fc6f8
+
 reads: data/bacteria/reads/sample*_{1,2}.fastq.gz
 ```
 
@@ -121,14 +135,16 @@ params.outdir = "results"
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::
 
-It can be useful to print the pipeline parameters to the screen. This can be done using the the `println` command and a multiline string statement. The string method `.stripIndent()` command is used to remove the indentation on multi-line strings. `println` also saves the output to the log execution file `.nextflow.log`.
+It can be useful to print the pipeline parameters to the screen. This can be done using the the `println` command and a multiline string statement. The string method `.stripIndent()` command is used to remove the indentation on multi-line strings. `println` also saves the output to the log execution file `.nextflow.log`. Statements cannot be mixed with script declarations, so println is nested in a workflow block, which we will expand on later.
 
 ```groovy 
-println """\
+workflow {
+  println """\
         reads: ${params.reads}
         outdir: ${params.outdir}
         """
         .stripIndent()
+}
 ```
 
 :::::::::::::::::::::::::::::::::::::::  challenge
@@ -144,13 +160,17 @@ $ nextflow run script1.nf
 
 Look at the output log `.nextflow.log`.
 
+```bash
+$ less .nextflow.log
+```
+
 :::::::::::::::  solution
 
 ## Solution
 
 Below is an example println command printing all the pipeline parameters.
 
-```groovy 
+```groovy
 println """\
         G E N O M E A S S E M B L Y - N F   P I P E L I N E    
         ===================================
@@ -184,15 +204,17 @@ nextflow.enable.dsl = 2
 params.reads = "data/bacteria/reads/*_R{1,2}.fastq.gz"
 params.outdir = "results"
 
-log.info """\
-         G E N O M E A S S E M B L Y - N F
-         ===================================
-         reads        : ${params.reads}
-         outdir       : ${params.outdir}
-         """
-         .stripIndent()
+workflow {
+  log.info """\
+          G E N O M E A S S E M B L Y - N F
+          ===================================
+          reads        : ${params.reads}
+          outdir       : ${params.outdir}
+          """
+          .stripIndent()
 
-read_pairs_ch = Channel.fromFilePairs( params.reads )
+  read_pairs_ch = channel.fromFilePairs( params.reads )
+}
 ```
 
 We can view the contents  of the `read_pairs_ch` by adding the following statement as the last line:
@@ -251,7 +273,7 @@ No such file: data/bacteria/reads/*_R1,2}.fastq.gz
 ## Solution
 
 ```groovy 
-read_pairs_ch =Channel.fromFilePairs(params.reads, checkIfExists: true)
+read_pairs_ch = channel.fromFilePairs(params.reads, checkIfExists: true)
 ```
 
 ```bash 
@@ -317,7 +339,7 @@ process TRIM {
 }
 
 workflow {
-  read_pairs_ch = Channel.fromFilePairs( params.reads, checkIfExists:true )
+  read_pairs_ch = channel.fromFilePairs( params.reads, checkIfExists:true )
 
   TRIM()
 }
@@ -394,7 +416,7 @@ To view the contents of the channel we can use the `view` operator.
 ```groovy 
 [..truncated..]
 workflow {
-  read_pairs_ch = Channel.fromFilePairs( params.reads, checkIfExists:true )
+  read_pairs_ch = channel.fromFilePairs( params.reads, checkIfExists:true )
 
   trimmed_reads_ch=TRIM(reads_ch)
   trimmed_reads_ch.view()
@@ -441,7 +463,7 @@ process ASSEMBLE {
 }
 
 workflow {
-  read_pairs_ch = Channel.fromFilePairs( params.reads, checkIfExists:true )
+  read_pairs_ch = channel.fromFilePairs( params.reads, checkIfExists:true )
 
   trimmed_reads_ch=TRIM(read_pairs_ch)
   assemblies_ch=ASSEMBLE(trimmed_reads_ch)
@@ -562,7 +584,7 @@ process FASTQC_TRIMMED {
 }
 
 workflow {
-  read_pairs_ch = Channel.fromFilePairs( params.reads, checkIfExists:true )
+  read_pairs_ch = channel.fromFilePairs( params.reads, checkIfExists:true )
 
   trimmed_reads_ch=TRIM(read_pairs_ch)
   assemblies_ch=ASSEMBLE(trimmed_reads_ch)
@@ -591,7 +613,7 @@ $ nextflow run script5.nf -resume
 
 ```groovy
 workflow {
-read_pairs_ch = Channel.fromFilePairs( params.reads, checkIfExists:true )
+read_pairs_ch = channel.fromFilePairs( params.reads, checkIfExists:true )
 
 trimmed_reads_ch=TRIM(read_pairs_ch)
 assemblies_ch=ASSEMBLE(trimmed_reads_ch)
@@ -617,8 +639,8 @@ Therefore, we will need to combine the outputs of `FASTQC` using:
 
 ```groovy
 //example of the mix operator
-ch1 = Channel.of(1,2)
-ch2 = Channel.of('a')
+ch1 = channel.of(1,2)
+ch2 = channel.of('a')
 ch1.mix(ch2).view()
 ```
 
@@ -632,7 +654,7 @@ a
 
 ```groovy
 //example of the collect operator
-ch1 = Channel.of(1,2,3)
+ch1 = channel.of(1,2,3)
 ch1.collect().view()
 ```
 
