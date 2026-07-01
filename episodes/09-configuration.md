@@ -295,7 +295,7 @@ Put this codeblock into a Nextflow script named configuration_process_labels.nf:
 ```groovy
 process P1 {
 
-    label "bigmem"
+    label "big_mem"
 
     script:
     """
@@ -305,7 +305,7 @@ process P1 {
 
 process P2 {
 
-    label "bigmem"
+    label "big_mem"
 
     script:
     """
@@ -341,7 +341,7 @@ Now generate a config file named configuration_process-labels.config to modify t
 
 ```groovy
 process {
-    withLabel: bigmem {
+    withLabel: big_mem {
         cpus = 16
         memory = 64.GB
     }
