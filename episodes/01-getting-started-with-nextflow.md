@@ -191,19 +191,15 @@ params.input = "data/yeast/reads/ref1_1.fq.gz"
 
 /*
 ========================================================================================
-    Input data is received through channels
-========================================================================================
-*/
-
-input_ch = channel.fromPath(params.input)
-
-/*
-========================================================================================
    Main Workflow
 ========================================================================================
 */
 
 workflow {
+    //  Input data is received through channels.
+
+    input_ch = channel.fromPath(params.input)
+
     //  The script to execute is called by it's process name, and input is provided between brackets.
 
     NUM_LINES(input_ch)
